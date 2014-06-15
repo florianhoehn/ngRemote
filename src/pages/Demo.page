@@ -1,0 +1,36 @@
+<apex:page readOnly="true">
+  <!-- HTML FOR APP -->
+  <div ng-app="ngApplication">
+    <div ng-controller="ngTestController">
+      {{Account}}
+    </div>
+  </div>
+  
+  <!-- DEFINITION REMOTEOBJECTS -->
+  <apex:remoteObjects jsNamespace="TestNamespace">
+    <apex:remoteObjectModel name="Account" jsShorthand="Account" fields="Id, Name"/>
+    <apex:remoteObjectModel name="Contact" jsShorthand="Contact" fields="Id, Name"/>
+  </apex:remoteObjects>
+  
+  <!-- INCLUDE ANGULARJS -->
+  <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"/>
+  
+  <!-- NGREMOTEOBJECTS -->
+  <c:ngRemoteObjects remoteObjectNamespace="TestNamespace" remoteObjects="Account, Contact" />
+  
+  <!-- ACTUAL ANGULARJS APP -->
+  <script type="text/javascript">
+    var ngApplication = angular.module('ngApplication', ['ngRemoteObjects']);
+    
+    ngApplication.controller('ngTestController', ['$scope', 'AccountService', function($scope, AccountService) {
+      AccountService.retrieveById('00120000018bC3e').then(function(result) {
+        if(result) {
+          console.log(result);
+          $scope.Account = result.records[0];
+        }
+      }, function(error) {
+        console.log(error);
+      });
+    }])
+  </script>
+</apex:page>
