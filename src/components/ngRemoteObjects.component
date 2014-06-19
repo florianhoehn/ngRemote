@@ -82,9 +82,20 @@
       * @description makes Visualforce variables available inside Angular
       */
       ngRemoteObjects.constant('Visualforce', {
-        CurrentUser : {
-          Id : '{!$User.Id}'
-        }
+        User : {
+          Id : '{!$User.Id}',
+          Name : '{!$User.Name}',
+          Alias : '{!$User.Alias}',
+          Title : '{!$User.Title}'
+        },
+        CurrentPage : {
+          Name : '{!$CurrentPage.Name}',
+          Url : '{!$CurrentPage.Url}'
+        },
+        Profile : {
+          Id : '{!Profile.Id}',
+          Name : '{!Profile.Name}'
+        },
       });
     </script>
   </apex:outputPanel>
