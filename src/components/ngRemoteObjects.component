@@ -10,10 +10,23 @@
   
   <script type="text/javascript">
     /**
+    * @author Florian Hoehn
+    * @date 20/06/2014
+    * @description checks if the given namespace for the remoteObjects is correctly defined
+    */
+    try {
+      var checkIfNamespaceExists = new {!remoteObjectNamespace}.Base();
+    } catch (error) {
+      console.log('Please set the correct remoteObjectNamespace: ' + error.message);
+    }
+  </script>
+
+  <script type="text/javascript">
+    /**
     * @description defines ngRemoteObjects AngularJS module
     */
     var ngRemoteObjects = angular.module('ngRemoteObjects', []);
-    
+
     /**
     * @author Florian Hoehn
     * @date 15/06/2014
@@ -26,11 +39,11 @@
           retrieve : function(options) {
             var deferred = $q.defer();
             sObjectModel.retrieve(options, function(error, records, event) {
-            if(error) {
-              deferred.reject(error);
-            } else {
-              deferred.resolve(event.result);
-            }
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(event.result);
+              }
             });
             return deferred.promise;
           },
@@ -73,7 +86,7 @@
       }
     }])
   </script>
-  
+
   <apex:outputPanel layout="none" rendered="{!VisualforceVariables}">
     <script type="text/javascript">
       /**
@@ -84,7 +97,8 @@
       ngRemoteObjects.constant('Visualforce', {
         User : {
           Id : '{!$User.Id}',
-          Name : '{!$User.Name}',
+          FirstName : '{!$User.FirstName}',
+          LastName : '{!$User.LastName}',
           Alias : '{!$User.Alias}',
           Title : '{!$User.Title}'
         },
@@ -93,13 +107,13 @@
           Url : '{!$CurrentPage.Url}'
         },
         Profile : {
-          Id : '{!Profile.Id}',
-          Name : '{!Profile.Name}'
+          Id : '{!$Profile.Id}',
+          Name : '{!$Profile.Name}'
         },
       });
     </script>
   </apex:outputPanel>
-  
+
   <apex:repeat value="{!remoteObjectList}" var="remoteObject">
     <script type="text/javascript">
       /**
