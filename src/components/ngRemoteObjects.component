@@ -1,25 +1,11 @@
 <!--
 * @author Florian Hoehn
-* @date 15/06/2014
 * @description ngRemoteObjects component which creates AngularJS services for all defined remoteObjects. Naming will be: <remoteObjectName>Service
 -->
 <apex:component layout="none" controller="ngRemoteObjectsController">
   <apex:attribute name="remoteObjectNamespace" type="String" required="false" default="SObjectModel" description="js namespace defined in the apex:remoteObjects tag" />
   <apex:attribute name="remoteObjects" type="String" required="true" assignTo="{!remoteObjectNames}" description="names of all remoteObject for which services will be created - separated by comma (i.e. 'Account, Contact')" />
   <apex:attribute name="VisualforceVariables" type="Boolean" required="false" default="false" description="checked if Visualforce constant should be created so that the AngularJS app can access Visualforce components" />
-  
-  <script type="text/javascript">
-    /**
-    * @author Florian Hoehn
-    * @date 20/06/2014
-    * @description checks if the given namespace for the remoteObjects is correctly defined
-    */
-    try {
-      var checkIfNamespaceExists = new {!remoteObjectNamespace}.Base();
-    } catch (error) {
-      console.log('Please set the correct remoteObjectNamespace: ' + error.message);
-    }
-  </script>
 
   <script type="text/javascript">
     /**
@@ -28,8 +14,6 @@
     var ngRemoteObjects = angular.module('ngRemoteObjects', []);
 
     /**
-    * @author Florian Hoehn
-    * @date 15/06/2014
     * @description generic service which dynamically accesses all four functions for the sObjectModel which is given to it
     * @param sObjectModel RemoteObjectModel
     */
@@ -50,6 +34,18 @@
           create : function(record) {
             var deferred = $q.defer();
             sObjectModel.create(record, function(error, records, event) {
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(event.result);
+              }
+            });
+            return deferred.promise;
+          },
+          upsert : function(record) {
+            var deferred = $q.defer();
+            sObjectModel._props = record;
+            sObjectModel.upsert(function(error, records, event) {
               if(error) {
                 deferred.reject(error);
               } else {
@@ -87,13 +83,11 @@
     }])
   </script>
 
+  /**
+  * @description makes Visualforce variables available inside Angular
+  */
   <apex:outputPanel layout="none" rendered="{!VisualforceVariables}">
     <script type="text/javascript">
-      /**
-      * @author Florian Hoehn
-      * @date 15/06/2014
-      * @description makes Visualforce variables available inside Angular
-      */
       ngRemoteObjects.constant('Visualforce', {
         User : {
           Id : '{!$User.Id}',
@@ -114,13 +108,11 @@
     </script>
   </apex:outputPanel>
 
+  /**
+  * @description loop over all remoteObjects to create an AngularJS service for each of them
+  */
   <apex:repeat value="{!remoteObjectList}" var="remoteObject">
     <script type="text/javascript">
-      /**
-      * @author Florian Hoehn
-      * @date 15/06/2014
-      * @description loop over all remoteObjects to create an AngularJS service for each of them
-      */
       ngRemoteObjects.factory('{!remoteObject}Service', ['GenericService', function(GenericService) {
         var model = new {!remoteObjectNamespace}.{!remoteObject}();
         var service = {
@@ -138,14 +130,23 @@
             };
             return GenericService(model).retrieve(options);
           },
+          retrieveRecentItems : function(numberOfRecentItems) {
+            var options = {
+              limit: numberOfRecentItems
+            };
+            return GenericService(model).retrieve(options);
+          },
           create : function(record) {
-            return GenericService(model).retrieve(record);
+            return GenericService(model).create(record);
+          },
+          upsert : function(record) {
+            return GenericService(model).upsert(record);
           },
           update : function(record) {
-            return GenericService(model).retrieve(record);
+            return GenericService(model).update(record);
           },
           delete : function(recordId) {
-            return GenericService(model).retrieve(recordId);
+            return GenericService(model).delete(recordId);
           }
         }
         return service;
