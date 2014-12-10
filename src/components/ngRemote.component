@@ -1,0 +1,230 @@
+<apex:component layout="none"
+                controller="ngRemoteController">
+<!--
+* @author Florian Hoehn
+* @description ngRemote component which creates AngularJS services for all defined remoteObjects. Naming will be: <remoteObjectName>Service
+-->
+  <apex:attribute name="remoteObjectNamespace"
+                  type="String"
+                  required="false"
+                  default="SObjectModel"
+                  description="js namespace defined in the apex:remoteObjects tag" />
+  <apex:attribute name="remoteObjects"
+                  type="String"
+                  required="true"
+                  assignTo="{!remoteObjectNames}"
+                  description="names of all remoteObject for which services will be created - separated by comma (i.e. 'Account, Contact')" />
+  <apex:attribute name="visualforceVariables"
+                  type="Boolean"
+                  required="false"
+                  default="false"
+                  description="checked if Visualforce constant should be created so that the AngularJS app can access Visualforce components" />
+
+  <script type="text/javascript">
+    (function () {
+      'use strict';
+      /**
+      * @description defines ngRemote AngularJS module
+      */
+      angular
+      .module('ngRemote', []);
+    })();
+
+    (function () {
+      'use strict';
+      /**
+      * @description defines ngRemote AngularJS module
+      */
+      angular
+      .module('ngRemote')
+
+      /**
+      * @description generic service which dynamically accesses all four functions for the sObjectModel which is given to it
+      * @param sObjectModel RemoteObjectModel
+      */
+      .factory('GenericService', ['$q', function($q) {
+        return function(sObjectModel) {
+          var service = {
+            retrieve : function(options) {
+              var deferred = $q.defer();
+              sObjectModel.retrieve(options,
+                                    function(error,
+                                             records,
+                                             event) {
+                if(error) {
+                  deferred.reject(error);
+                } else {
+                  deferred.resolve(event.result);
+                }
+              });
+              return deferred.promise;
+            },
+            create : function(record) {
+              var deferred = $q.defer();
+              sObjectModel.create(record,
+                                  function(error,
+                                           records,
+                                           event) {
+                if(error) {
+                  deferred.reject(error);
+                } else {
+                  deferred.resolve(event.result);
+                }
+              });
+              return deferred.promise;
+            },
+            upsert : function(record) {
+              var deferred = $q.defer();
+              sObjectModel._props = record;
+              sObjectModel.upsert(function(error,
+                                           records,
+                                           event) {
+                if(error) {
+                  deferred.reject(error);
+                } else {
+                  deferred.resolve(event.result);
+                }
+              });
+              return deferred.promise;
+            },
+            update : function(record) {
+              var deferred = $q.defer();
+              sObjectModel._props = record;
+              sObjectModel.update(function(error,
+                                           records,
+                                           event) {
+                if(error) {
+                  deferred.reject(error);
+                } else {
+                  deferred.resolve(event.result);
+                }
+              });
+              return deferred.promise;
+            },
+            del : function(recordId) {
+              var deferred = $q.defer();
+              sObjectModel.del(recordId, function(error,
+                                                  records,
+                                                  event) {
+                if(error) {
+                  deferred.reject(error);
+                } else {
+                  deferred.resolve(event.result);
+                }
+              });
+              return deferred.promise;
+            }
+          };
+          return service;
+        }
+      }]);
+    })();
+  </script>
+
+  <apex:repeat value="{!remoteObjectList}"
+               var="remoteObject">
+    <script type="text/javascript">
+      (function () {
+        'use strict';
+        /**
+        * @description defines ngRemote AngularJS module
+        */
+        angular
+        .module('ngRemote')
+        /**
+        * @description loop over all remoteObjects to create an AngularJS service for each of them
+        */
+        .factory('{!remoteObject}Service',
+                         ['GenericService',
+                          function(GenericService) {
+          var model = new {!remoteObjectNamespace}.{!remoteObject}();
+          var service = {
+            retrieve : function(options) {
+              return GenericService(model).retrieve(options);
+            },
+            retrieveById : function(recordId) {
+              var options = {
+                where: {
+                  Id: {
+                    eq: recordId
+                  }
+                },
+                limit: 1
+              };
+              return GenericService(model).retrieve(options);
+            },
+            retrieveByParentId : function(parentFieldName,
+                                          recordId,
+                                          numberOfRecords) {
+              var optionsString = '{' +
+                  '"' + parentFieldName + '"' + ': {' +
+                    '"eq": ' + '"' + recordId + '"' +
+                  '}' +
+                '}';
+              var options = {
+                where: {
+                },
+                limit: numberOfRecords
+              };
+              options.where = eval('(' + optionsString + ')');
+              return GenericService(model).retrieve(options);
+            },
+            retrieveRecentItems : function(numberOfRecentItems) {
+              var options = {
+                limit: numberOfRecentItems
+              };
+              return GenericService(model).retrieve(options);
+            },
+            create : function(record) {
+              return GenericService(model).create(record);
+            },
+            upsert : function(record) {
+              return GenericService(model).upsert(record);
+            },
+            update : function(record) {
+              return GenericService(model).update(record);
+            },
+            del : function(recordId) {
+              return GenericService(model).del(recordId);
+            }
+          }
+          return service;
+        }]);
+      })();
+    </script>
+  </apex:repeat>
+
+  <apex:outputPanel layout="none"
+                    rendered="{!visualforceVariables}">
+    <script type="text/javascript">
+      (function () {
+        'use strict';
+        /**
+        * @description defines ngRemote AngularJS module
+        */
+        angular
+        .module('ngRemote')
+        /**
+        * @description makes Visualforce variables available inside Angular
+        */
+        .constant('Visualforce', {
+          User : {
+            Id : '{!$User.Id}',
+            FirstName : '{!$User.FirstName}',
+            LastName : '{!$User.LastName}',
+            Alias : '{!$User.Alias}',
+            Title : '{!$User.Title}'
+          },
+          CurrentPage : {
+            Name : '{!$CurrentPage.Name}',
+            Url : '{!$CurrentPage.Url}'
+          },
+          Profile : {
+            Id : '{!$Profile.Id}',
+            Name : '{!$Profile.Name}'
+          }
+        });
+      })();
+    </script>
+  </apex:outputPanel>
+</apex:component>
