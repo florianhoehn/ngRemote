@@ -1,36 +1,68 @@
 <apex:page readOnly="true">
   <!-- HTML FOR APP -->
-  <div ng-app="ngApplication">
-    <div ng-controller="ngTestController">
-      {{Account}}
+  <div ng-app="ngApp">
+    <div ng-controller="demoController">
+      <p>Accounts:</p>
+      <ul>
+        <li ng-repeat="account in accounts">
+          <a href="#" ng-click="getContacts(account.Id)">{{account.Name}}</a>
+        </li>
+      </ul>
+
+      <p>Contacts for selectected account:</p>
+      <ul>
+        <li ng-repeat="contact in contacts">
+          <p>{{contact.Name}}</p>
+        </li>
+      </ul>
     </div>
   </div>
-  
+
   <!-- DEFINITION REMOTEOBJECTS -->
   <apex:remoteObjects jsNamespace="TestNamespace">
-    <apex:remoteObjectModel name="Account" jsShorthand="Account" fields="Id, Name"/>
-    <apex:remoteObjectModel name="Contact" jsShorthand="Contact" fields="Id, Name"/>
+    <apex:remoteObjectModel name="Account"
+                            fields="Id, Name"/>
+    <apex:remoteObjectModel name="Contact"
+                            fields="Id, AccountId, Name"/>
   </apex:remoteObjects>
-  
+
   <!-- INCLUDE ANGULARJS -->
   <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"/>
-  
+
   <!-- NGREMOTEOBJECTS -->
-  <c:ngRemoteObjects remoteObjectNamespace="TestNamespace" remoteObjects="Account, Contact" />
-  
+  <c:ngRemote remoteObjectNamespace="TestNamespace"
+              remoteObjects="Account, Contact" />
+
   <!-- ACTUAL ANGULARJS APP -->
   <script type="text/javascript">
-    var ngApplication = angular.module('ngApplication', ['ngRemoteObjects']);
-    
-    ngApplication.controller('ngTestController', ['$scope', 'AccountService', function($scope, AccountService) {
-      AccountService.retrieveById('00120000018bC3e').then(function(result) {
+    var ngApp = angular.module('ngApp', ['ngRemote']);
+
+    ngApp.controller('demoController',
+                     ['$scope',
+                     'AccountService',
+                     'ContactService',
+                     function($scope,
+                              AccountService,
+                              ContactService) {
+      AccountService.retrieve({limit:10}).then(function(result) {
         if(result) {
-          console.log(result);
-          $scope.Account = result.records[0];
+          $scope.accounts = result.records;
         }
       }, function(error) {
         console.log(error);
       });
-    }])
+
+      $scope.getContacts = function(accountId) {
+        ContactService.retrieveByParentId('AccountId',
+                                          accountId,
+                                          5).then(function(result) {
+          if(result) {
+            $scope.contacts = result.records;
+          }
+        }, function(error) {
+          console.log(error);
+        });
+      }
+    }]);
   </script>
 </apex:page>
