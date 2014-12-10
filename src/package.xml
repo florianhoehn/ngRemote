@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>ngRemoteObjectsController</members>
+        <members>ngRemoteController</members>
+        <members>ngRemoteController_Test</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>ngRemoteObjects</members>
+        <members>ngRemote</members>
         <name>ApexComponent</name>
     </types>
     <types>
         <members>Demo</members>
         <name>ApexPage</name>
     </types>
-    <version>30.0</version>
+    <version>31.0</version>
 </Package>

@@ -1,3 +1,7 @@
 *.jar
 *.properties
 build.*
+config/*
+*.sublime-project
+*.sublime-settings
+*..sublime-workspace
