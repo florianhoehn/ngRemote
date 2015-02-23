@@ -20,228 +20,36 @@
                   default="false"
                   description="checked if Visualforce constant should be created so that the AngularJS app can access Visualforce components" />
 
-  <script type="text/javascript">
-    var config = {
-      namespace: '{!remoteObjectNamespace}',
-      objects: []
-    }
-
-    var remoteObjectNames = '{!remoteObjects}';
-    if(remoteObjectNames != '') {
-      angular.forEach(remoteObjectNames.split(','), function(value, key) {
-        config.objects.push(value.trim());
-      });
-    }
-
-    console.log("config", config);
-
-    /** results in:
-    config Object {namespace: "TestNamespace", objects: Array[3]}namespace: "TestNamespace"objects: Array[3]0: "Account"1: "Contact"2: "Log"
-    */
-  </script>
-
 
   <script type="text/javascript">
     (function () {
-      'use strict';
-      /**
-      * @description defines ngRemote AngularJS module
+
+      var config = {
+        namespace: '{!remoteObjectNamespace}',
+        objects: []
+      };
+
+      var remoteObjectNames = '{!remoteObjects}';
+      if(remoteObjectNames) {
+        var remoteObjects = remoteObjectNames.split(',');
+        config.objects = remoteObjects.map(function (name) {
+          return name.trim();
+        });
+      }
+
+      console.log("config", config);
+
+      /** results in:
+        config Object {namespace: "TestNamespace", objects: Array[3]}namespace: "TestNamespace"objects: Array[3]0: "Account"1: "Contact"2: "Log"
       */
+
+      angular.module('ngRemote', []);
+
       angular
-      .module('ngRemote', []);
-    })();
-
-    (function () {
-      'use strict';
-      /**
-      * @description defines ngRemote AngularJS module
-      */
-      angular
-      .module('ngRemote')
-
-      /**
-      * @description generic service which dynamically accesses all four functions for the sObjectModel which is given to it
-      * @param sObjectModel RemoteObjectModel
-      */
-      .factory('GenericService', ['$q', function($q) {
-        return function(sObjectModel) {
-          var service = {
-            retrieve : retrieve,
-            create : create,
-            upsert : upsert,
-            update : update,
-            del : del
-          };
-
-          return service;
-
-          function retrieve(options) {
-            var deferred = $q.defer();
-            sObjectModel.retrieve(options,
-                                  function(error,
-                                           records,
-                                           event) {
-              if(error) {
-                deferred.reject(error);
-              } else {
-                deferred.resolve(parseObjectToArray(event.result.records));
-              }
-            });
-            return deferred.promise;
-          }
-
-          function create(record) {
-            var deferred = $q.defer();
-            sObjectModel.create(record,
-                                function(error,
-                                         records,
-                                         event) {
-              if(error) {
-                deferred.reject(error);
-              } else {
-                deferred.resolve(parseObjectToArray(event.result.records));
-              }
-            });
-            return deferred.promise;
-          }
-
-          function upsert(record) {
-            var deferred = $q.defer();
-            sObjectModel._props = record;
-            sObjectModel.upsert(function(error,
-                                         records,
-                                         event) {
-              if(error) {
-                deferred.reject(error);
-              } else {
-                deferred.resolve(parseObjectToArray(event.result.records));
-              }
-            });
-            return deferred.promise;
-          }
-
-          function update(record) {
-            var deferred = $q.defer();
-            sObjectModel._props = record;
-            sObjectModel.update(function(error,
-                                         records,
-                                         event) {
-              if(error) {
-                deferred.reject(error);
-              } else {
-                deferred.resolve(parseObjectToArray(event.result.records));
-              }
-            });
-            return deferred.promise;
-          }
-
-          function del(recordId) {
-            var deferred = $q.defer();
-            sObjectModel.del(recordId, function(error,
-                                                records,
-                                                event) {
-              if(error) {
-                deferred.reject(error);
-              } else {
-                deferred.resolve(parseObjectToArray(event.result.records));
-              }
-            });
-            return deferred.promise;
-          }
-
-          function parseObjectToArray(objectOfObjects) {
-            var records = Object.keys(objectOfObjects).map(function (key) {
-              return objectOfObjects[key];
-            });
-
-            return records;
-          }
-        }
-      }]);
-    })();
-  </script>
-
-  <apex:repeat value="{!remoteObjectList}"
-               var="remoteObject">
-    <script type="text/javascript">
-      (function () {
-        'use strict';
-        /**
-        * @description defines ngRemote AngularJS module
-        */
-        angular
         .module('ngRemote')
-        /**
-        * @description loop over all remoteObjects to create an AngularJS service for each of them
-        */
-        .factory('{!remoteObject}Service',
-                 ['GenericService',
-                 function(GenericService) {
-          var model = new {!remoteObjectNamespace}.{!remoteObject}();
-          var service = {
-            retrieve : function(options) {
-              return GenericService(model).retrieve(options);
-            },
-            retrieveById : retrieveById,
-            retrieveByParentId : retrieveByParentId,
-            retrieveRecentItems : retrieveRecentItems,
-            create : function(record) {
-              return GenericService(model).create(record);
-            },
-            upsert : function(record) {
-              return GenericService(model).upsert(record);
-            },
-            update : function(record) {
-              return GenericService(model).update(record);
-            },
-            del : function(recordId) {
-              return GenericService(model).del(recordId);
-            }
-          }
-          return service;
-
-          function retrieveById(recordId) {
-            var options = {
-              where: {
-                Id: {
-                  eq: recordId
-                }
-              },
-              limit: 1
-            };
-            return GenericService(model).retrieve(options);
-          }
-
-          function retrieveByParentId(parentFieldName, recordId, numberOfRecords) {
-            var optionsString = '{' +
-                '"' + parentFieldName + '"' + ': {' +
-                  '"eq": ' + '"' + recordId + '"' +
-                '}' +
-              '}';
-            var options = {
-              where: {
-              },
-              limit: numberOfRecords
-            };
-            options.where = eval('(' + optionsString + ')');
-            return GenericService(model).retrieve(options);
-          }
-
-          function retrieveRecentItems(numberOfRecentItems) {
-            var options = {
-              orderby: [
-                {
-                  LastModifiedDate: 'DESC'
-                }
-              ],
-              limit: numberOfRecentItems
-            };
-            return GenericService(model).retrieve(options);
-          }
-        }]);
-      })();
-    </script>
-  </apex:repeat>
+        .constant('ngRemote.remoteObjectsDictionary', config);
+    })();
+  </script>
 
   <apex:outputPanel layout="none"
                     rendered="{!visualforceVariables}">
