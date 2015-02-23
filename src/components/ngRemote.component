@@ -154,51 +154,16 @@
         * @description loop over all remoteObjects to create an AngularJS service for each of them
         */
         .factory('{!remoteObject}Service',
-                         ['GenericService',
-                          function(GenericService) {
+                 ['GenericService',
+                 function(GenericService) {
           var model = new {!remoteObjectNamespace}.{!remoteObject}();
           var service = {
             retrieve : function(options) {
               return GenericService(model).retrieve(options);
             },
-            retrieveById : function(recordId) {
-              var options = {
-                where: {
-                  Id: {
-                    eq: recordId
-                  }
-                },
-                limit: 1
-              };
-              return GenericService(model).retrieve(options);
-            },
-            retrieveByParentId : function(parentFieldName,
-                                          recordId,
-                                          numberOfRecords) {
-              var optionsString = '{' +
-                  '"' + parentFieldName + '"' + ': {' +
-                    '"eq": ' + '"' + recordId + '"' +
-                  '}' +
-                '}';
-              var options = {
-                where: {
-                },
-                limit: numberOfRecords
-              };
-              options.where = eval('(' + optionsString + ')');
-              return GenericService(model).retrieve(options);
-            },
-            retrieveRecentItems : function(numberOfRecentItems) {
-              var options = {
-                orderby: [
-                  {
-                    LastModifiedDate: 'DESC'
-                  }
-                ],
-                limit: numberOfRecentItems
-              };
-              return GenericService(model).retrieve(options);
-            },
+            retrieveById : retrieveById,
+            retrieveByParentId : retrieveByParentId,
+            retrieveRecentItems : retrieveRecentItems,
             create : function(record) {
               return GenericService(model).create(record);
             },
@@ -213,6 +178,45 @@
             }
           }
           return service;
+
+          function retrieveById(recordId) {
+            var options = {
+              where: {
+                Id: {
+                  eq: recordId
+                }
+              },
+              limit: 1
+            };
+            return GenericService(model).retrieve(options);
+          }
+
+          function retrieveByParentId(parentFieldName, recordId, numberOfRecords) {
+            var optionsString = '{' +
+                '"' + parentFieldName + '"' + ': {' +
+                  '"eq": ' + '"' + recordId + '"' +
+                '}' +
+              '}';
+            var options = {
+              where: {
+              },
+              limit: numberOfRecords
+            };
+            options.where = eval('(' + optionsString + ')');
+            return GenericService(model).retrieve(options);
+          }
+
+          function retrieveRecentItems(numberOfRecentItems) {
+            var options = {
+              orderby: [
+                {
+                  LastModifiedDate: 'DESC'
+                }
+              ],
+              limit: numberOfRecentItems
+            };
+            return GenericService(model).retrieve(options);
+          }
         }]);
       })();
     </script>
