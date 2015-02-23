@@ -11,7 +11,7 @@
 
       <p>Contacts for selectected account:</p>
       <ul>
-        <li ng-repeat="contact in contacts">
+        <li ng-repeat="contact in selectedAccount.contacts">
           <p>{{contact.Name}}</p>
         </li>
       </ul>
@@ -21,7 +21,7 @@
   <!-- DEFINITION REMOTEOBJECTS -->
   <apex:remoteObjects jsNamespace="TestNamespace">
     <apex:remoteObjectModel name="Account"
-                            fields="Id, Name"/>
+                            fields="Id, Name, LastModifiedDate"/>
     <apex:remoteObjectModel name="Contact"
                             fields="Id, AccountId, Name"/>
   </apex:remoteObjects>
@@ -31,7 +31,8 @@
 
   <!-- NGREMOTEOBJECTS -->
   <c:ngRemote remoteObjectNamespace="TestNamespace"
-              remoteObjects="Account, Contact" />
+              remoteObjects="Account, Contact"
+              log="true" />
 
   <!-- ACTUAL ANGULARJS APP -->
   <script type="text/javascript">
@@ -44,7 +45,7 @@
                      function($scope,
                               AccountService,
                               ContactService) {
-      AccountService.retrieve({limit:10}).then(function(result) {
+      AccountService.retrieveRecentItems(5).then(function(result) {
         if(result) {
           $scope.accounts = result.records;
         }
@@ -57,7 +58,12 @@
                                           accountId,
                                           5).then(function(result) {
           if(result) {
-            $scope.contacts = result.records;
+            angular.forEach($scope.accounts, function(account) {
+              if(account.Id === accountId) {
+                account.contacts = result.records;
+                $scope.selectedAccount = account;
+              }
+            });
           }
         }, function(error) {
           console.log(error);
