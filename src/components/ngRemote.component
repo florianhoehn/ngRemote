@@ -21,6 +21,27 @@
                   description="checked if Visualforce constant should be created so that the AngularJS app can access Visualforce components" />
 
   <script type="text/javascript">
+    var config = {
+      namespace: '{!remoteObjectNamespace}',
+      objects: []
+    }
+
+    var remoteObjectNames = '{!remoteObjects}';
+    if(remoteObjectNames != '') {
+      angular.forEach(remoteObjectNames.split(','), function(value, key) {
+        config.objects.push(value.trim());
+      });
+    }
+
+    console.log("config", config);
+
+    /** results in:
+    config Object {namespace: "TestNamespace", objects: Array[3]}namespace: "TestNamespace"objects: Array[3]0: "Account"1: "Contact"2: "Log"
+    */
+  </script>
+
+
+  <script type="text/javascript">
     (function () {
       'use strict';
       /**
