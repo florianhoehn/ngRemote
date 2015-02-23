@@ -45,77 +45,96 @@
       .factory('GenericService', ['$q', function($q) {
         return function(sObjectModel) {
           var service = {
-            retrieve : function(options) {
-              var deferred = $q.defer();
-              sObjectModel.retrieve(options,
-                                    function(error,
-                                             records,
-                                             event) {
-                if(error) {
-                  deferred.reject(error);
-                } else {
-                  deferred.resolve(event.result);
-                }
-              });
-              return deferred.promise;
-            },
-            create : function(record) {
-              var deferred = $q.defer();
-              sObjectModel.create(record,
+            retrieve : retrieve,
+            create : create,
+            upsert : upsert,
+            update : update,
+            del : del
+          };
+
+          return service;
+
+          function retrieve(options) {
+            var deferred = $q.defer();
+            sObjectModel.retrieve(options,
                                   function(error,
                                            records,
                                            event) {
-                if(error) {
-                  deferred.reject(error);
-                } else {
-                  deferred.resolve(event.result);
-                }
-              });
-              return deferred.promise;
-            },
-            upsert : function(record) {
-              var deferred = $q.defer();
-              sObjectModel._props = record;
-              sObjectModel.upsert(function(error,
-                                           records,
-                                           event) {
-                if(error) {
-                  deferred.reject(error);
-                } else {
-                  deferred.resolve(event.result);
-                }
-              });
-              return deferred.promise;
-            },
-            update : function(record) {
-              var deferred = $q.defer();
-              sObjectModel._props = record;
-              sObjectModel.update(function(error,
-                                           records,
-                                           event) {
-                if(error) {
-                  deferred.reject(error);
-                } else {
-                  deferred.resolve(event.result);
-                }
-              });
-              return deferred.promise;
-            },
-            del : function(recordId) {
-              var deferred = $q.defer();
-              sObjectModel.del(recordId, function(error,
-                                                  records,
-                                                  event) {
-                if(error) {
-                  deferred.reject(error);
-                } else {
-                  deferred.resolve(event.result);
-                }
-              });
-              return deferred.promise;
-            }
-          };
-          return service;
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(parseObjectToArray(event.result.records));
+              }
+            });
+            return deferred.promise;
+          }
+
+          function create(record) {
+            var deferred = $q.defer();
+            sObjectModel.create(record,
+                                function(error,
+                                         records,
+                                         event) {
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(parseObjectToArray(event.result.records));
+              }
+            });
+            return deferred.promise;
+          }
+
+          function upsert(record) {
+            var deferred = $q.defer();
+            sObjectModel._props = record;
+            sObjectModel.upsert(function(error,
+                                         records,
+                                         event) {
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(parseObjectToArray(event.result.records));
+              }
+            });
+            return deferred.promise;
+          }
+
+          function update(record) {
+            var deferred = $q.defer();
+            sObjectModel._props = record;
+            sObjectModel.update(function(error,
+                                         records,
+                                         event) {
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(parseObjectToArray(event.result.records));
+              }
+            });
+            return deferred.promise;
+          }
+
+          function del(recordId) {
+            var deferred = $q.defer();
+            sObjectModel.del(recordId, function(error,
+                                                records,
+                                                event) {
+              if(error) {
+                deferred.reject(error);
+              } else {
+                deferred.resolve(parseObjectToArray(event.result.records));
+              }
+            });
+            return deferred.promise;
+          }
+
+          function parseObjectToArray(objectOfObjects) {
+            var records = Object.keys(objectOfObjects).map(function (key) {
+              return objectOfObjects[key];
+            });
+
+            return records;
+          }
         }
       }]);
     })();
