@@ -171,6 +171,11 @@
             },
             retrieveRecentItems : function(numberOfRecentItems) {
               var options = {
+                orderby: [
+                  {
+                    LastModifiedDate: 'DESC'
+                  }
+                ],
                 limit: numberOfRecentItems
               };
               return GenericService(model).retrieve(options);
