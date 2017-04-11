@@ -1,14 +1,19 @@
-#ngRemote
+# ngRemote
 
-##Overview
+<a href="https://travis-ci.org/florianhoehn/ngRemote">
+  <img alt="Travis-CI Status"
+       src="https://travis-ci.org/florianhoehn/ngRemote.svg?branch=master">
+</a>
+
+## Overview
 
 ngRemote is a library for bringing Visualforce Remote Objects and AngularJS together to enable developers to utilise Visualforce Remote Object functionality exposed as AngularJS services for use within your application.
 
 You can find out more about ngRemote at [the project blog here.](https://medium.com/angularjs-visualforce-remoteobjects-joined)
 
-##Usage
+## Usage
 
-###Basic Inclusion
+### Basic Inclusion
 
 To use ngRemote you should include the Visualforce Component and its associated controller and test class in your Salesforce project. To use the component include it and the AngularJS framework on your page:
 
@@ -24,7 +29,7 @@ The *remoteObjectNamespace* attribute has to match the jsNamespace you define in
 
 You should inject the ngRemote Angular module into your Angular application.
 
-###Injecting Services
+### Injecting Services
 
 The component will define an Angular service for each object you pass into the *remoteObjects* attribute array named XXXXXService where XXXX is the shorthand passed in. For example the component definition:
 
@@ -35,7 +40,7 @@ The component will define an Angular service for each object you pass into the *
 ```
 will cause the component to define an AngularJS *AccountService* for you to use. You can then inject this service into the correct places for use in your application.
 
-###Available Methods
+### Available Methods
 
 The service defined for you will contain the following methods for use:
 - retrieve
@@ -60,7 +65,7 @@ AccountService.upsert(accountRecord);
 AccountService.delete(accountRecord);
 ```
 
-###Constants
+### Constants
 
 You can inject the Visualforce constant set to obtain access to the following Visualforce globals/constants:
 
