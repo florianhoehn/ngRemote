@@ -1,0 +1,9 @@
+language: java
+branches:
+  only: 
+    - master
+script: 
+  - git submodule add --force https://github.com/florianhoehn/seamless.git
+  - ant -lib seamless/lib/ -f seamless/build.xml build
+notifications:
+  slack: mavenschat:2Pmhpn10xoK1ZfvHfV648YHe
