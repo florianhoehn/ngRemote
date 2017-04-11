@@ -3,10 +3,5 @@
     <apiVersion>30.0</apiVersion>
     <availableInTouch>false</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <label>Test</label>
-    <packageVersions>
-        <majorNumber>1</majorNumber>
-        <minorNumber>6</minorNumber>
-        <namespace>sf_com_apps</namespace>
-    </packageVersions>
+    <label>Demo</label>
 </ApexPage>
