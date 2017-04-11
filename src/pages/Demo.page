@@ -31,8 +31,7 @@
 
   <!-- NGREMOTEOBJECTS -->
   <c:ngRemote remoteObjectNamespace="TestNamespace"
-              remoteObjects="Account, Contact"
-              log="true" />
+              remoteObjects="Account, Contact"/>
 
   <!-- ACTUAL ANGULARJS APP -->
   <script type="text/javascript">
