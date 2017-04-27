@@ -1,9 +1,9 @@
 # ngRemote
 
-<a href="https://travis-ci.org/florianhoehn/ngRemote">
-  <img alt="Travis-CI Status"
-       src="https://travis-ci.org/florianhoehn/ngRemote.svg?branch=master">
-</a>
+  [![deploy to salesforce](https://img.shields.io/badge/salesforce-deploy-blue.svg?style=flat)](https://githubsfdeploy.herokuapp.com)
+  [![Travis-CI Build Status](https://travis-ci.org//florianhoehn/ngRemote.svg?branch=master")](https://travis-ci.org/florianhoehn/ngRemote)
+[![Test Coverage](https://codeclimate.com/github/florianhoehn/ngRemote/badges/coverage.svg)](https://codeclimate.com/github/florianhoehn/ngRemote/coverage)
+  [![Code Climate](https://codeclimate.com/github/florianhoehn/ngRemote/badges/gpa.svg)](https://codeclimate.com/github/florianhoehn/ngRemote)
 
 ## Overview
 
